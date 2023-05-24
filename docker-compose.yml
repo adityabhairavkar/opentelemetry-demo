@@ -76,9 +76,8 @@ services:
   # Cart service
   cartservice:
     container_name: cart-service
-    build:
-      context: ./
-      dockerfile: ./src/cartservice/src/Dockerfile
+    image:
+        adib070/opentelemetry-demo-cartservice
     deploy:
       resources:
         limits:
