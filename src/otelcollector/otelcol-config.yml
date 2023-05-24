@@ -17,13 +17,19 @@ exporters:
     endpoint: "jaeger:4317"
     tls:
       insecure: true
+#  logging:
+#  prometheus:
+#    endpoint: "otelcol:9464"
+#    resource_to_telemetry_conversion:
+#      enabled: true
+#    enable_open_metrics: true
   logging:
-  prometheus:
-    endpoint: "otelcol:9464"
-    resource_to_telemetry_conversion:
-      enabled: true
-    enable_open_metrics: true
-
+    loglevel: debug
+  otlphttp:
+    endpoint: https://qauat02.logicmonitor.com/rest/api
+    headers:
+      Authorization: "Bearer lmb_WFVtMkFTMk03QnFFNG5iSDZkaWk6emwybnJvS2wwekx3d2NBWjlyZzRMUT09LZjFmMzQ2MzgtOGE4NS00OTIzLWI4YmItZDc4NTFkMzBkYjljL0Qkiy5"
+      x-logicmonitor-account: "qauat02"
 processors:
   batch:
   filter:
@@ -41,12 +47,12 @@ service:
     traces:
       receivers: [otlp]
       processors: [batch]
-      exporters: [otlp, logging, spanmetrics]
-    metrics:
-      receivers: [otlp, spanmetrics]
-      processors: [filter, batch]
-      exporters: [prometheus, logging]
-    logs:
-      receivers: [otlp]
-      processors: [batch]
-      exporters: [logging]
+      exporters: [otlphttp, logging]
+#    metrics:
+#      receivers: [otlp, spanmetrics]
+#      processors: [filter, batch]
+#      exporters: [prometheus, logging]
+#    logs:
+#      receivers: [otlp]
+#      processors: [batch]
+#      exporters: [logging]

@@ -7,6 +7,7 @@ using OpenTelemetry.Trace;
 using cartservice.cartstore;
 using cartservice.featureflags;
 using Oteldemo;
+using Microsoft.Extensions.Logging;
 
 namespace cartservice.services
 {
@@ -16,11 +17,13 @@ namespace cartservice.services
         private readonly static ICartStore BadCartStore = new RedisCartStore("badhost:1234");
         private readonly ICartStore _cartStore;
         private readonly FeatureFlagHelper _featureFlagHelper;
+        private readonly ILogger<CartService> _logger;
 
-        public CartService(ICartStore cartStore, FeatureFlagHelper featureFlagService)
+        public CartService(ICartStore cartStore, FeatureFlagHelper featureFlagService, ILogger<CartService> logger)
         {
             _cartStore = cartStore;
             _featureFlagHelper = featureFlagService;
+            _logger = logger;
         }
 
         public async override Task<Empty> AddItem(AddItemRequest request, ServerCallContext context)
@@ -29,6 +32,8 @@ namespace cartservice.services
             activity?.SetTag("app.user.id", request.UserId);
             activity?.SetTag("app.product.id", request.Item.ProductId);
             activity?.SetTag("app.product.quantity", request.Item.Quantity);
+            _logger.LogInformation("Adding Item " + request.Item.ProductId + " for UserId:" + request.UserId);
+            _logger.LogInformation("Neew");
 
             await _cartStore.AddItemAsync(request.UserId, request.Item.ProductId, request.Item.Quantity);
             return Empty;
@@ -47,6 +52,7 @@ namespace cartservice.services
                 totalCart += item.Quantity;
             }
             activity?.SetTag("app.cart.items.count", totalCart);
+            _logger.LogInformation("Fetching Cart Items for UserId:" + request.UserId);
 
             return cart;
         }
@@ -61,10 +67,12 @@ namespace cartservice.services
             {
                 if (await _featureFlagHelper.GenerateCartError())
                 {
+                    _logger.LogError("Cart Service delete Failed");
                     await BadCartStore.EmptyCartAsync(request.UserId);
                 }
                 else
                 {
+                    _logger.LogInformation("Removing Cart items");
                     await _cartStore.EmptyCartAsync(request.UserId);
                 }
             }

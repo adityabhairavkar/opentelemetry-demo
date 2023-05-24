@@ -18,7 +18,6 @@
 FROM mcr.microsoft.com/dotnet/sdk:6.0.408 AS builder
 
 WORKDIR /usr/src/app/
-
 COPY ./src/cartservice/ ./
 COPY ./pb/ ./src/protos/
 
@@ -26,7 +25,7 @@ RUN \
   RUNTIME_IDENTIIFER=linux-musl-x64; \
   if [ "$(uname -m)" = "aarch64" ]; then RUNTIME_IDENTIIFER=linux-musl-arm64; fi; \
   dotnet restore ./src/cartservice.csproj -r $RUNTIME_IDENTIIFER && \
-  dotnet publish ./src/cartservice.csproj -p:PublishSingleFile=true -r $RUNTIME_IDENTIIFER --self-contained true -p:PublishTrimmed=True -p:TrimMode=Link -c Release -o /cartservice --no-restore
+  dotnet publish ./src/cartservice.csproj -p:PublishSingleFile=false -r $RUNTIME_IDENTIIFER --self-contained true -p:PublishTrimmed=false -p:TrimMode=Link -c Release -o /cartservice --no-restore
 
 # -----------------------------------------------------------------------------
 
